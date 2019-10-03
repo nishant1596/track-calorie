@@ -11,9 +11,7 @@ const ItemCtrl =(function () {
   }
   //Data Structure
   const data={
-    item:[
-
-    ],
+    item:[],
     currentItem:null,
     totalCalories:0
   }
@@ -85,6 +83,22 @@ const UICtrl=(function () {
     },
     addCaloriesToUI:function (totalCalories) {
       document.querySelector('.total-calories').innerHTML=`${totalCalories}`;
+    },
+    clearEditState:function () {
+      document.getElementById('item-name').value='';
+      document.getElementById('item-calories').value='';
+      document.querySelector('.delete-btn').style.display='none';
+      document.querySelector('.update-btn').style.display='none';
+      document.querySelector('.back-btn').style.display='none';
+      document.querySelector('.add-btn').style.display='inline';
+    },
+    updateState:function (itemFound) {
+      document.getElementById('item-name').value = itemFound.name;
+      document.getElementById('item-calories').value = itemFound.calories;
+      document.querySelector('.delete-btn').style.display='inline';
+      document.querySelector('.update-btn').style.display='inline';
+      document.querySelector('.back-btn').style.display='inline';
+      document.querySelector('.add-btn').style.display='none';
     }
   }
 })();
@@ -95,6 +109,8 @@ const App = (function (ItemCtrl,UICtrl) {
   //Load Event Listeners
   const loadEventListeners=function () {
     document.querySelector('.add-btn').addEventListener('click',itemAddSubmit);
+    document.querySelector('#item-list').addEventListener('click',itemUpdateSubmit);
+    document.querySelector('.back-btn').addEventListener('click',UICtrl.clearEditState)
   }
     const itemAddSubmit=function (e) {
     const input = UICtrl.getItemInput();
@@ -107,11 +123,24 @@ const App = (function (ItemCtrl,UICtrl) {
 
     e.preventDefault();
   }
+  const itemUpdateSubmit=function(e){
+    if (e.target.classList.contains('edit-item')) {
+      //Get List Item Id
+      const id = e.target.parentElement.parentElement.id;
+      let searchId = id.split('-');
+      searchId=parseInt(searchId[1]);
+      const allItems = ItemCtrl.logData().item;
+      const itemFound = allItems[searchId];
+      UICtrl.updateState(itemFound);
+
+    }
+    e.preventDefault();
+  }
   return {
     init:function () {
+      UICtrl.clearEditState();
       const items=ItemCtrl.logData().item;
       UICtrl.populateItemList(items);
-
       loadEventListeners();
     }
   }
